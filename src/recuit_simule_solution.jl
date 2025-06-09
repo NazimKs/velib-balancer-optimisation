@@ -296,7 +296,7 @@ function print_details(details, return_distance, final_charge)
 end
 
 function main()
-    instance_dir = "instances"
+    instance_dir = "../instances"
     files = readdir(instance_dir)
     
     # Filtrer les fichiers .dat

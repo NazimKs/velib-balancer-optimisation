@@ -62,27 +62,29 @@ nbvp_i + \sum_{j=1}^n depot_{ij} \leq cap_i & \forall i \\
 \end{cases}
 ```
 
-## 4. Fonction Objective du problème
+## 4. Fonction Objective du problème (Approche Lexicographique)
 
-
+### Premier Niveau : Minimiser le Déséquilibre Global
 ```math
-\min \quad \underbrace{\alpha \sum_{i=1}^n (d_i^+ + d_i^-)}_{\text{Déséquilibre}} + \underbrace{(1-\alpha) D}_{\text{Distance}}
+\min \quad d^* = \sum_{i=1}^n (d_i^+ + d_i^-)
 ```
 
-où :
-
+### Deuxième Niveau : Minimiser la Distance parmi les solutions optimales
 ```math
-D = \sum_{j=1}^{n-1} \sum_{i=1}^n \sum_{k=1}^n x_{ij} x_{k,j+1} d_{ik} + \sum_{i=1}^n x_{i1} d_{0i} + \sum_{i=1}^n x_{in} d_{i0}
+\min \quad D = \sum_{j=1}^{n-1} \sum_{i=1}^n \sum_{k=1}^n x_{ij} x_{k,j+1} d_{ik} + \sum_{i=1}^n x_{i1} d_{0i} + \sum_{i=1}^n x_{in} d_{i0}
 ```
 
-### Paramétrage
-$\alpha \in [0,1]$ (coefficient de pondération)
-
-### Formulation Finale
-
+sous la contrainte additionnelle :
 ```math
-\min \alpha \sum_{i=1}^n (d_i^+ + d_i^-) + (1-\alpha) \left( \sum_{j=1}^{n-1} \sum_{i=1}^n \sum_{k=1}^n x_{ij} x_{k,j+1} d_{ik} + \sum_{i=1}^n x_{i1} d_{0i} + \sum_{i=1}^n x_{in} d_{i0} \right)
+\sum_{i=1}^n (d_i^+ + d_i^-) = d^*
 ```
+
+où $d^*$ est la valeur optimale obtenue au premier niveau.
+
+### Notes d'Implémentation
+L'approche lexicographique nécessite une résolution en deux étapes :
+1. D'abord minimiser le déséquilibre global pour trouver d*
+2. Puis minimiser la distance parmi les solutions ayant d* comme déséquilibre
 
 
 
@@ -101,8 +103,21 @@ y_{ijk} \geq 0
 \end{cases}
 ```
 
-### b) Formulation Linéaire Équivalente
+### b) Formulation Linéaire pour l'Approche Lexicographique
 
+**Première Étape (Déséquilibre) :**
 ```math
-\min \alpha \sum_i (d_i^+ + d_i^-) + (1-\alpha) \left[\sum_{i,k,j} y_{ijk} d_{ik} + \sum_i (x_{i1} d_{0i} + x_{in} d_{i0})\right]
+\min \sum_i (d_i^+ + d_i^-)
 ```
+
+**Deuxième Étape (Distance) :**
+```math
+\min \left[\sum_{i,k,j} y_{ijk} d_{ik} + \sum_i (x_{i1} d_{0i} + x_{in} d_{i0})\right]
+```
+sous la contrainte :
+```math
+\sum_i (d_i^+ + d_i^-) = d^*
+```
+
+### c) Variables de Linéarisation
+Les variables $y_{ijk}$ remplacent les produits $x_{ij}x_{k,j+1}$ dans le calcul de la distance totale.
